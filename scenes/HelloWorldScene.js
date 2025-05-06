@@ -44,13 +44,13 @@ create() {
     const objects = this.physics.add.group();
 
     const creaForma = () => {
-        const x = Phaser.Math.Between(50, 750); // Posición aleatoria en el eje X
+          const x = Phaser.Math.Between(50, 750); // Posición aleatoria en el eje X
         const y = Phaser.Math.Between(50, 100); // Posición aleatoria en la parte superior
         const type = Phaser.Math.RND.pick(["diamante", "traingulo", "cuadrado"]); // Seleccionar tipo aleatorio
         const obj = objects.create(x, y, type).setScale(0.5); // Crear objeto
         this.physics.add.collider(obj, platforms); // Colisión con la plataforma
         obj.setVelocityY(Phaser.Math.Between(50, 100)); // Velocidad aleatoria hacia abajo
-        obj.setBounce(0.2); // Rebote al chocar con la plataforma
+        obj.setBounce(0.5); // Rebote al chocar con la plataforma
         }
     //--- Temporizador
     this.time.addEvent({
@@ -66,7 +66,7 @@ create() {
     //---Objetos - Colisión entre objetos y plataforma
       this.physics.add.collider(objects, platforms, (obj, platform) => {
         // Retrasar la destrucción del objeto
-       this.time.delayedCall(2000, () => {
+       this.time.delayedCall(5000, () => {
             obj.destroy(); // Destruir el objeto después del retraso
         });
       });
@@ -77,8 +77,11 @@ create() {
       A: Phaser.Input.Keyboard.KeyCodes.A,
       S: Phaser.Input.Keyboard.KeyCodes.S,
       D: Phaser.Input.Keyboard.KeyCodes.D,
+      R: Phaser.Input.Keyboard.KeyCodes.R,
       Barra: Phaser.Input.Keyboard.KeyCodes.SPACE,
   });
+
+
   
   this.InAir = true; // Variable para controlar el estado de salto
   this.ninja = ninja; // Guardar referencia al ninja para usar en update
@@ -87,21 +90,35 @@ create() {
 
   update() {
    // update game objects
-
- // Movimiento del ninja con WASD
+ // --- Reinicio ---
+  // Reiniciar la escena si se presiona la tecla R 
+  if (this.input.keyboard.checkDown(this.cursors.R, 500)) {
+  //if (this.input.keyboard.isDown(this.cursors.R)) {
+    this.scene.restart(); // Reiniciar la escena
+  }
+   // Movimiento del ninja con WASD
     //--- Izquierda y derecha ---
    if (this.cursors.A.isDown) {
-       this.ninja.setVelocityX(-200); // Mover a la izquierda
+       this.ninja.setVelocityX(-200)
+       if (this.ninja.body.touching.down) {
+           this.ninja.angle -= 5;
+       }
+       ; // Mover a la izquierda
    }  
    if (this.cursors.D.isDown) {
-       this.ninja.setVelocityX(200); // Mover a la derecha
+       this.ninja.setVelocityX(200);
+       if (this.ninja.body.touching.down) {
+        this.ninja.angle += 5;
+    } // Mover a la derecha
    } 
     //--- No Muv ---
    if (this.cursors.A.isDown && this.cursors.D.isDown) {
-       this.ninja.setVelocityX(0); // Detener movimiento horizontal
+       this.ninja.setVelocityX(0);// Detener movimiento horizontal
+       this.ninja.angle = 0; 
    }
    if (this.cursors.A.isUp && this.cursors.D.isUp) {
        this.ninja.setVelocityX(0); // Detener movimiento horizontal
+       //this.ninja.angle = 0;
    }
     //--- Arriba y abajo ---
    if (this.cursors.W.isDown && this.ninja.body.touching.down) {
@@ -117,7 +134,7 @@ create() {
    }
    if (Phaser.Input.Keyboard.JustDown(this.cursors.Barra)){
     if (this.cursors.A.isDown) {
-      this.ninja.setVelocity(
+      this.ninja.setVelocity(   
        this.ninja.body.velocity.x + -30000,
        this.ninja.body.velocity.y + 75 
       ); // Detener movimiento vertical
