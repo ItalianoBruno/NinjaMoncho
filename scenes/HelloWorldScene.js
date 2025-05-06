@@ -61,6 +61,8 @@ create() {
 
     //---Ninja - Colisión entre el ninja y las formas
     this.physics.add.overlap(ninja, objects, (ninja, obj) => {
+      this.puntos += 1; // Incrementar el contador de puntos
+      this.puntosText.setText("Puntos: " + this.puntos); // Actualizar el texto de puntos
       obj.destroy(); });// Destruir el objeto al tocarlo 
     
     //---Objetos - Colisión entre objetos y plataforma
@@ -71,7 +73,20 @@ create() {
         });
       });
 
-      // --- Configurar teclas WASD ---
+      //Temporizador
+    this.tiempo = 30
+    this.tiempoText = this.add.text(600, 16, "Tiempo: 30", {
+        fontSize: "32px",
+        fill: "#fff",
+      });
+      //Contador de Puntos
+    this.puntos = 0;
+    this.puntosText = this.add.text(16, 16, "Puntos: " + this.puntos , {
+        fontSize: "32px",
+        fill: "#fff",
+      });
+
+      //Configurar teclas WASD 
     this.cursors = this.input.keyboard.addKeys({
       W: Phaser.Input.Keyboard.KeyCodes.W,
       A: Phaser.Input.Keyboard.KeyCodes.A,
@@ -92,8 +107,7 @@ create() {
    // update game objects
  // --- Reinicio ---
   // Reiniciar la escena si se presiona la tecla R 
-  if (this.input.keyboard.checkDown(this.cursors.R, 500)) {
-  //if (this.input.keyboard.isDown(this.cursors.R)) {
+  if (Phaser.Input.Keyboard.JustDown(this.cursors.R)) {
     this.scene.restart(); // Reiniciar la escena
   }
    // Movimiento del ninja con WASD
@@ -113,12 +127,10 @@ create() {
    } 
     //--- No Muv ---
    if (this.cursors.A.isDown && this.cursors.D.isDown) {
-       this.ninja.setVelocityX(0);// Detener movimiento horizontal
-       this.ninja.angle = 0; 
+       this.ninja.setVelocityX(0);// Detener movimiento horizontal 
    }
    if (this.cursors.A.isUp && this.cursors.D.isUp) {
        this.ninja.setVelocityX(0); // Detener movimiento horizontal
-       //this.ninja.angle = 0;
    }
     //--- Arriba y abajo ---
    if (this.cursors.W.isDown && this.ninja.body.touching.down) {
