@@ -8,6 +8,7 @@ export default class GameOverScene extends Phaser.Scene {
     this.puntos = data.puntos;
     this.tiempo = data.tiempo;
     this.jTiempo = data.jTiempo;
+    this.gano = data.Gano; // Tiempo total jugado
   }
 
   preload() { 
@@ -17,10 +18,17 @@ export default class GameOverScene extends Phaser.Scene {
     // Fondo
     this.add.image(400, 300, "sky").setScale(1.85);
     // Mostrar mensaje de "Perdiste"
+    if (this.gano === true) {
+      this.add.text(400, 200, "¡Ganaste!", {
+        fontSize: "48px",
+        fill: "#00ff00",
+      }).setOrigin(0.5);
+    } else {
     this.add.text(400, 200, "¡Perdiste!", {
       fontSize: "48px",
       fill: "#ff0000",
     }).setOrigin(0.5);
+    }
 
     // Mostrar los puntos obtenidos
     this.add.text(400, 300, `Puntos: ${this.puntos}`, {
@@ -29,7 +37,7 @@ export default class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Mostrar el tiempo que tardaste
-    this.add.text(400, 350, `Tiempo: ${this.jTiempo} segundos`, {
+    this.add.text(400, 350, `Tiempo: ${this.tiempo} segundos`, {
       fontSize: "32px",
       fill: "#ffffff",
     }).setOrigin(0.5);

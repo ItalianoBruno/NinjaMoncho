@@ -16,6 +16,7 @@ export default class HelloWorldScene extends Phaser.Scene {
 
   preload() {
     // load assets
+    this.load.image("bombini", "./public/assets/Bomb.png");
     this.load.image("Aldea", "./public/assets/FondoMenu.jpg");
     this.load.image("sky", "./public/assets/Cielo.webp");
     this.load.image("piso", "./public/assets/platform.png");
@@ -34,13 +35,15 @@ export default class HelloWorldScene extends Phaser.Scene {
     const ninja = this.physics.add.image(400, 100, "ninja").setScale(0.125);
     ninja.setCollideWorldBounds(true); // No salir de los límites del mundo
 
-    //Plataforma
+    //Plataforma 1#
     const platforms = this.physics.add.staticGroup();
     platforms.create(400, 590, "piso").setScale(2).refreshBody();
     this.physics.add.collider(ninja, platforms);
-
-    // Tiempo jugado
-    this.jTiempo = 0;
+    //Plataforma 2#
+    platforms.create(120, 360, "piso").setScale(0.7).refreshBody();
+    this.physics.add.collider(ninja, platforms);
+    //Plataforma 3#
+    platforms.create(700, 300, "piso").setScale(0.7).refreshBody();
 
     //Crear objetos
    const objects = this.physics.add.group();
@@ -48,7 +51,7 @@ export default class HelloWorldScene extends Phaser.Scene {
     const creaForma = () => {
       const x = Phaser.Math.Between(50, 750); // Posición aleatoria en el eje X
       const y = Phaser.Math.Between(50, 65); // Posición aleatoria en la parte superior
-      const type = Phaser.Math.RND.pick(["diamante", "triangulo", "cuadrado"]); // Seleccionar tipo aleatorio
+      const type = Phaser.Math.RND.pick(["diamante", "triangulo", "cuadrado", "bombini"]); // Seleccionar tipo aleatorio
       const obj = objects.create(x, y, type).setScale(0.5); // Crear objeto
 
           if (type === "diamante") {
@@ -67,9 +70,15 @@ export default class HelloWorldScene extends Phaser.Scene {
 
           if (type === "cuadrado") {
            //obj.setVelocity(Phaser.Math.Between(-100, 100)); // Velocidad aleatoria
-           obj.setTint(0xff0000); // Cambiar color a rojo
+            obj.setTint(0xffff00); // Cambiar color a amarillo
            obj.Puntos = 15;
            obj.Tiempo = 0;
+      }
+          if (type === "bombini") {
+            //obj.setVelocity(Phaser.Math.Between(-100, 100)); // Velocidad aleatoria
+           obj.setTint(0xff0000).setScale(0.06); // Cambiar color a rojo
+            obj.Puntos = -5;
+            obj.Tiempo = -2;
       }
 
       // Velocidad aleatoria hacia abajo
@@ -80,9 +89,15 @@ export default class HelloWorldScene extends Phaser.Scene {
       //---Objetos - Colisión entre objetos y plataforma
       this.physics.add.collider(objects, platforms, (obj, platform) => {
         
-          if (obj.Puntos <= 0) { obj.destroy(); }
+        if (obj.texture.key === "bombini") {
+          obj.puntos = -10; 
+          this.time.delayedCall(3000, () => {
+      if (obj.active) {obj.destroy();}
+    });
+        } 
 
         if (obj.texture.key === "diamante") {
+          if (obj.Puntos <= 0) { obj.destroy(); }
               obj.Puntos -= 5;
         }
         if (obj.texture.key === "triangulo") {
@@ -110,11 +125,12 @@ export default class HelloWorldScene extends Phaser.Scene {
       this.tiempo += obj.Tiempo; // Sumar tiempo al ninja 
 
       this.puntosText.setText("Puntos: " + this.puntos); // Actualizar el texto de puntos
-      obj.destroy(); });// Destruir el objeto al tocarlo 
+      obj.destroy(); // Destruir el objeto al tocarlo
+    }); 
 
 
     //Temporizador
-    this.tiempo = 30
+    this.tiempo = 35
     this.tiempoText = this.add.text(600, 16, "Tiempo: 30", {
       fontSize: "32px",
       fill: "#fff",
@@ -140,26 +156,43 @@ export default class HelloWorldScene extends Phaser.Scene {
 
     this.InAir = true; // Variable para controlar el estado de salto
     this.ninja = ninja; // Guardar referencia al ninja para usar en update
+    this.gano = false; // Variable para controlar si el jugador ha ganado
+    this.jTiempo = 0; // Tiempo jugado
+
   }
   //
 
   update() {
   //   // update game objects
 
+    //puntos para ganar
+    if (this.puntos >= 100) {
+      this.gano = true; // Cambiar a la escena de "Game Over" cuando el tiempo se acabe
+      this.scene.start("perder", {
+        puntos: this.puntos,
+        tiempo: Math.floor(30 - this.tiempo),
+        TiempoJugado: this.jTiempo,
+        Gano: this.gano, // Tiempo total jugado
+      });
+    }
+
     // Lógica para reducir el tiempo
     if (this.tiempo > 0) {
-      this.tiempo -= 7 / 60; // Reducir tiempo (60 FPS)
+      
+     this.jTiempo += 1 / 60; // Reducir tiempo (60 FPS) 
+      this.tiempo -= 1  / 60; // Reducir tiempo (60 FPS)
       this.tiempoText.setText("Tiempo: " + Math.floor(this.tiempo));
     } else {
       // Cambiar a la escena de "Game Over" cuando el tiempo se acabe
       this.scene.start("perder", {
         puntos: this.puntos,
         tiempo: Math.floor(30 - this.tiempo),
-        TiempoJugado: Math.floor(this.jTiempo) // Tiempo total jugado
+        TiempoJugado: this.jTiempo,
+        Gano: this.gano, // Tiempo total jugado
       });
     }
     //Tiempo Jugado
-     this.jTiempo += 1 / 60;
+     this.jTiempo += 1 / 60; // Reducir tiempo (60 FPS)
     // --- Reinicio ---
     // Reiniciar la escena si se presiona la tecla R 
     if (Phaser.Input.Keyboard.JustDown(this.cursors.R)) {
