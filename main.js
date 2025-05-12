@@ -1,4 +1,5 @@
 import HelloWorldScene from "./scenes/HelloWorldScene.js";
+import Perder from "./scenes/Perder.js";
 
 // Create a new Phaser config object
 const config = {
@@ -27,7 +28,7 @@ const config = {
   // List of scenes to load
   // Only the first scene will be shown
   // Remember to import the scene before adding it to the list
-  scene: [HelloWorldScene],
+  scene: [HelloWorldScene, Perder, ],
 };
 
 // Create a new Phaser game instance
